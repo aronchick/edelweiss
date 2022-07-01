@@ -134,7 +134,7 @@ func (x GoServerImpl) GoDef() cg.Blueprint {
 					writer.WriteHeader(500)
 					return
 				}
-				writer.Header()["ETag"] = etag
+				writer.Header()["ETag"] = []string{etag}
 				writer.Write(result)
 				if f, ok := writer.({{.HTTPFlusher}}); ok {
 					f.Flush()
@@ -292,7 +292,7 @@ func {{.AsyncHandler}}(s {{.Interface}}) {{.HTTPHandlerFunc}} {
 				writer.WriteHeader(500)
 				return
 			}
-			writer.Header()["ETag"] = etag
+			writer.Header()["ETag"] = []string{etag}
 			writer.Write(result)
 			if f, ok := writer.({{.HTTPFlusher}}); ok {
 				f.Flush()
