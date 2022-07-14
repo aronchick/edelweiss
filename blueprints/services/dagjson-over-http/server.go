@@ -78,7 +78,7 @@ func (x GoServerImpl) GoDef() cg.Blueprint {
 				return
 			}
 			{{end}}
-			ch, err := s.{{.MethodName}}({{.ContextBackground}}(), env.{{.MethodName}})
+			ch, err := s.{{.MethodName}}(request.Context(), env.{{.MethodName}})
 			if err != nil {
 				{{.LoggerVar}}.Errorf("service rejected request (%v)", err)
 				writer.Header()["Error"] = []string{err.Error()}
@@ -97,14 +97,14 @@ func (x GoServerImpl) GoDef() cg.Blueprint {
 				}
 				resultWriter = writer
 			}
-		chanLoop:
+		chanLoop_{{.MethodName}}:
 			for {
 				select {
 				case <-request.Context().Done():
 					return
 				case resp, ok := <-ch:
 					if !ok {
-						break chanLoop
+						break chanLoop_{{.MethodName}}
 					}
 					var env *{{.ReturnEnvelope}}
 					if resp.Err != nil {
@@ -115,7 +115,7 @@ func (x GoServerImpl) GoDef() cg.Blueprint {
 					var buf {{.BytesBuffer}}
 					if err = {{.IPLDEncodeStreaming}}(&buf, env, {{.DAGJSONEncode}}); err != nil {
 						{{.LoggerVar}}.Errorf("cannot encode response (%v)", err)
-						continue chanLoop
+						continue chanLoop_{{.MethodName}}
 					}
 					buf.WriteByte("\n"[0])
 					resultWriter.Write(buf.Bytes())
